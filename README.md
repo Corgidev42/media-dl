@@ -1,15 +1,15 @@
-# 🎧 Universal Media Downloader - `media-dl`
+# 🎵 Universal Media Downloader - `media-dl`
 
 ## 📌 Description
 
-**Universal Media Downloader** est un outil professionnel pour télécharger facilement de l'audio et de la vidéo depuis YouTube, SoundCloud et d'autres plateformes supportées par `yt-dlp`.
+**Universal Media Downloader** is a professional-grade tool for downloading audio and video content from YouTube, SoundCloud, and any platform supported by `yt-dlp`.
 
-- Téléchargement automatique de playlists ou de fichiers uniques.
-- Format audio et vidéo au choix.
-- Incrustation automatique de la pochette, artiste, album dans les fichiers MP3.
-- Option d'incruster les paroles si disponibles via `--with-lyrics`.
-- Mode interactif **ou** mode silencieux ultra-rapide.
-- Compatible Linux / macOS / Windows (avec Python 3).
+- Automatic download of playlists or single files.
+- Choose your preferred audio and video formats.
+- Automatically embeds cover art, artist, and album metadata into MP3 files.
+- Optionally embed lyrics if available using `--with-lyrics`.
+- Interactive mode **or** ultra-fast silent mode.
+- Fully compatible with Linux / macOS / Windows (Python 3.7+).
 
 ---
 
@@ -19,90 +19,122 @@
 make all
 ```
 
-Cela va :
-- Créer un environnement virtuel Python.
-- Installer toutes les dépendances automatiquement (`yt-dlp`, `mutagen`, `requests`).
+This will:
+- Create a Python virtual environment `.venv`
+- Install all required dependencies automatically (`yt-dlp`, `mutagen`, `requests`)
 
 ---
 
-## 🔄 Mise à jour de `yt-dlp`
+## 🔄 Update `yt-dlp`
 
 ```bash
 make update
 ```
+- Easily update `yt-dlp` to the latest version without breaking the project.
 
 ---
 
-## ▶️ Utilisation
+## ▶️ Usage
 
-### 1. Mode Interactif
+### 1. Interactive Mode (manual choice)
 
 ```bash
 make run
 ```
 
-- Le programme te proposera de choisir pour chaque URL :
-  - Audio seulement (avec choix du format)
-  - Vidéo seulement (avec choix de qualité)
-  - Vidéo + Sous-titres (avec choix de langue)
+- For each URL listed in `urls.txt`, you can choose:
+  - Audio only (choose the format: mp3, m4a, flac, opus, wav)
+  - Video only (choose the quality: 1080p, 720p, etc.)
+  - Video + Subtitles (choose the language)
 
-**Exemple :**
-- Dossier `downloads/` créé automatiquement.
-- Logs complets disponibles dans `downloads/log.txt`.
-
-### 2. Mode Silencieux (rapide)
+### 2. Silent Mode (automatic download)
 
 ```bash
 make silent
 ```
 
-- Tout sera téléchargé en MP3 par défaut sans aucune question.
+- Automatically downloads everything as MP3 or MP4 without any prompts.
+- `downloads/` folder is created automatically.
 
-### 3. Mode Avec Paroles Incrustées (optionnel)
+### 3. With Lyrics (optional)
 
 ```bash
 make run ARGS="--with-lyrics"
 ```
+or
+```bash
+make silent ARGS="--with-lyrics"
+```
 
-- Cherche automatiquement les sous-titres.
-- Les nettoie et les intègre dans le fichier MP3 si disponibles.
+- Fetches and embeds subtitles as lyrics into the MP3 if available.
 
 ---
 
-## 📂 Structure du projet
+## 📂 Project Structure
 
 ```
 media-dl/
 ├── Makefile
 ├── media_dl.py
-├── urls.txt (liste d'URLs à télécharger)
-└── downloads/
-    ├── *.mp3 / *.mp4
-    └── log.txt
+├── urls.txt         # List of URLs to download
+├── downloads/
+│   ├── *.mp3 / *.mp4
+│   └── log.txt      # Download history
+└── README.md
 ```
 
 ---
 
-## 👀 Options Supportées
+## 📁 Available Commands
 
-| Option | Effet |
+| Command | Description |
+|:---|:---|
+| `make all` | Create the virtual environment and install dependencies |
+| `make run` | Run the downloader in interactive mode |
+| `make silent` | Run the downloader in silent mode |
+| `make update` | Update yt-dlp |
+| `make clean` | Remove only the virtual environment |
+| `make fclean` | Remove the virtual environment and downloads folder |
+| `make re` | Full clean and reinstall |
+| `make help` | Display the available commands |
+
+---
+
+## 🛠️ Supported Options
+
+| Option | Effect |
 |:------|:------|
-| `--silent` | Mode silencieux, pas d'interaction. |
-| `--with-lyrics` | Télécharge et incruste les paroles si disponibles. |
-| `--update` | Met à jour automatiquement `yt-dlp`. |
+| `--silent` | No user interaction, automatic mode |
+| `--with-lyrics` | Download and embed lyrics into MP3 if available |
+| `--update` | Update `yt-dlp` easily |
 
 ---
 
-## 👤 Auteur
+## 👤 Author
 
-- **Projet par** Vincent B.
-- Contact : [vbonnard.dev@gmail.com](mailto:vbonnard.dev@gmail.com)
+- **Project developed by** Vincent B.
+- Contact: [vbonnard.dev@gmail.com](mailto:vbonnard.dev@gmail.com)
 
 ---
 
-## 📅 Licence
+## 🗓 License
 
-Projet open-source pour un usage personnel et éducatif uniquement.
+**For personal and educational use only.**
+Not affiliated with YouTube, SoundCloud, or any other platform.
 
-**Not affiliated with YouTube, SoundCloud, or any other platform.**
+---
+
+# ✅ Ready to use and fully operational.
+
+---
+
+# 📣 Professional Notes
+- **Audio formats** supported: `mp3`, `m4a`, `flac`, `opus`, `wav`
+- **Video formats** supported: `mp4`, `mkv`, `webm`
+- **`downloads/` folder** is auto-created if missing
+- **Automatic logging** of all downloads in `downloads/log.txt`
+
+---
+
+Enjoy your downloading experience!
 
