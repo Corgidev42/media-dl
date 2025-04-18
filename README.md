@@ -1,77 +1,108 @@
-# 🕷 Universal Music Downloader (YouTube + SoundCloud)
+# 🎧 Universal Media Downloader - `media-dl`
 
 ## 📌 Description
 
-**Universal Music Downloader** est un outil Python pour télécharger de la musique depuis **YouTube**, **SoundCloud**, ou **des playlists entières**, avec conversion automatique en MP3.
+**Universal Media Downloader** est un outil professionnel pour télécharger facilement de l'audio et de la vidéo depuis YouTube, SoundCloud et d'autres plateformes supportées par `yt-dlp`.
+
+- Téléchargement automatique de playlists ou de fichiers uniques.
+- Format audio et vidéo au choix.
+- Incrustation automatique de la pochette, artiste, album dans les fichiers MP3.
+- Option d'incruster les paroles si disponibles via `--with-lyrics`.
+- Mode interactif **ou** mode silencieux ultra-rapide.
+- Compatible Linux / macOS / Windows (avec Python 3).
 
 ---
 
-## 🎮 Features
-
-- 🎵 Supporte SoundCloud et YouTube
-- 📄 Télécharge une musique ou une playlist entière
-- 🎧 Conversion automatique en MP3 (192 kbps)
-- 📂 Organisation dans un dossier `downloads/`
-- ⚙️ Utilisation ultra simple : `make run`
-
----
-
-## 🛠 Requirements
-
-- Python 3
-- `ffmpeg` installé
-
-### Installer ffmpeg
+## 🔧 Installation
 
 ```bash
-# macOS
-brew install ffmpeg
+make all
+```
 
-# Ubuntu/Debian
-sudo apt install ffmpeg
+Cela va :
+- Créer un environnement virtuel Python.
+- Installer toutes les dépendances automatiquement (`yt-dlp`, `mutagen`, `requests`).
+
+---
+
+## 🔄 Mise à jour de `yt-dlp`
+
+```bash
+make update
 ```
 
 ---
 
-## ▶️ Usage
+## ▶️ Utilisation
 
-1. Mettez toutes vos URLs dans `urls.txt`, une par ligne.
+### 1. Mode Interactif
 
-```
-https://soundcloud.com/user/track1
-https://youtube.com/watch?v=track2
-...
-```
-
-2. Lancez le téléchargement :
 ```bash
 make run
 ```
 
-Les fichiers MP3 seront enregistrés dans le dossier `downloads/`.
+- Le programme te proposera de choisir pour chaque URL :
+  - Audio seulement (avec choix du format)
+  - Vidéo seulement (avec choix de qualité)
+  - Vidéo + Sous-titres (avec choix de langue)
+
+**Exemple :**
+- Dossier `downloads/` créé automatiquement.
+- Logs complets disponibles dans `downloads/log.txt`.
+
+### 2. Mode Silencieux (rapide)
+
+```bash
+make silent
+```
+
+- Tout sera téléchargé en MP3 par défaut sans aucune question.
+
+### 3. Mode Avec Paroles Incrustées (optionnel)
+
+```bash
+make run ARGS="--with-lyrics"
+```
+
+- Cherche automatiquement les sous-titres.
+- Les nettoie et les intègre dans le fichier MP3 si disponibles.
 
 ---
 
-## 📂 Structure
+## 📂 Structure du projet
 
 ```
-universal-music-downloader/
-├── downloader.py
+media-dl/
 ├── Makefile
-├── README.md
-├── .gitignore
-├── urls.txt
-├── downloads/
+├── media_dl.py
+├── urls.txt (liste d'URLs à télécharger)
+└── downloads/
+    ├── *.mp3 / *.mp4
+    └── log.txt
 ```
 
 ---
 
-## 👤 Author
+## 👀 Options Supportées
 
-- Vincent B. (vbonnard.dev@gmail.com)
+| Option | Effet |
+|:------|:------|
+| `--silent` | Mode silencieux, pas d'interaction. |
+| `--with-lyrics` | Télécharge et incruste les paroles si disponibles. |
+| `--update` | Met à jour automatiquement `yt-dlp`. |
 
 ---
 
-## 📜 License & Disclaimer
+## 👤 Auteur
 
-For personal and educational use only.
+- **Projet par** Vincent B.
+- Contact : [vbonnard.dev@gmail.com](mailto:vbonnard.dev@gmail.com)
+
+---
+
+## 📅 Licence
+
+Projet open-source pour un usage personnel et éducatif uniquement.
+
+**Not affiliated with YouTube, SoundCloud, or any other platform.**
+
