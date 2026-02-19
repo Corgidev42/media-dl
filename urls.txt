@@ -1,2 +1,18 @@
-https://www.youtube.com/watch?v=GGnpIFK3G0Q
-https://www.youtube.com/watch?v=WJi6m7R8ADY
+# ═══════════════════════════════════════════════════════
+# 📝 Fichier d'URLs - Universal Media Downloader
+# ═══════════════════════════════════════════════════════
+#
+# Instructions :
+# - Ajoutez une URL par ligne
+# - Les lignes commençant par # sont des commentaires (ignorées)
+# - Les lignes vides sont ignorées
+# - Formats supportés : YouTube, SoundCloud, et autres plateformes yt-dlp
+#
+# Exemple :
+# https://www.youtube.com/watch?v=...
+#
+# ═══════════════════════════════════════════════════════
+
+# Ajoutez vos URLs ci-dessous :
+
+
