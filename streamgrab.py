@@ -28,7 +28,8 @@ DEFAULT_CONFIG = {
 	'video_quality': 'high',
 	'with_lyrics': False,
 	'embed_metadata': True,
-	'download_folder': 'downloads'
+	'download_folder': 'downloads',
+	'twitch_browser': ''  # chrome, firefox, safari, edge, opera, etc.
 }
 
 CONFIG_FILE = 'config.json'
@@ -173,7 +174,7 @@ def embed_metadata(audio_path, title, artist, album, thumbnail_url, lyrics_text=
 	except Exception as e:
 		print(f"⚠️ Failed to embed metadata: {e}")
 
-def download_audio(url, download_folder, audio_format='mp3', quality='high', embed=True):
+def download_audio(url, download_folder, audio_format='mp3', quality='high', embed=True, config=None):
 	"""Télécharge l'audio avec la qualité spécifiée"""
 	bitrate = QUALITY_PRESETS['audio'].get(quality, QUALITY_PRESETS['audio']['high'])['bitrate']
 	
@@ -194,6 +195,12 @@ def download_audio(url, download_folder, audio_format='mp3', quality='high', emb
 		'no_warnings': True,
 		'progress_hooks': [progress_hook],
 	}
+	
+	# Ajouter l'authentification Twitch via cookies navigateur
+	if config and config.get('twitch_browser'):
+		if 'twitch.tv' in url:
+			ydl_opts['cookiesfrombrowser'] = (config['twitch_browser'],)
+			print_info(f"Authentification Twitch activée (cookies depuis {config['twitch_browser'].capitalize()})")
 
 	with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 		try:
@@ -226,7 +233,7 @@ def download_audio(url, download_folder, audio_format='mp3', quality='high', emb
 			print_error(f"Erreur lors du téléchargement: {e}")
 			return False
 
-def download_video(url, download_folder, quality='high', video_format='mp4', subtitles=False, sub_lang='en'):
+def download_video(url, download_folder, quality='high', video_format='mp4', subtitles=False, sub_lang='en', config=None):
 	"""Télécharge la vidéo avec la qualité spécifiée"""
 	# Si quality est un preset, récupère la hauteur
 	if quality in QUALITY_PRESETS['video']:
@@ -248,6 +255,12 @@ def download_video(url, download_folder, quality='high', video_format='mp4', sub
 		'no_warnings': True,
 		'progress_hooks': [progress_hook],
 	}
+	
+	# Ajouter l'authentification Twitch via cookies navigateur
+	if config and config.get('twitch_browser'):
+		if 'twitch.tv' in url:
+			ydl_opts['cookiesfrombrowser'] = (config['twitch_browser'],)
+			print_info(f"Authentification Twitch activée (cookies depuis {config['twitch_browser'].capitalize()})")
 	
 	with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 		try:
@@ -303,7 +316,7 @@ def show_format_menu(media_type):
 
 def show_main_menu():
 	"""Affiche le menu principal"""
-	print_header("📥 UNIVERSAL MEDIA DOWNLOADER")
+	print_header("📥 STREAMGRAB DOWNLOADER")
 	print(f"{Colors.BOLD}Que voulez-vous télécharger ?{Colors.RESET}\n")
 	print(f"  {Colors.GREEN}1.{Colors.RESET} Audio seulement")
 	print(f"  {Colors.GREEN}2.{Colors.RESET} Vidéo seulement")
@@ -314,54 +327,135 @@ def show_main_menu():
 
 def configure_preferences(config):
 	"""Configure les préférences utilisateur"""
-	print_header("⚙️  CONFIGURATION DES PRÉFÉRENCES")
-	
-	print(f"{Colors.BOLD}Configuration actuelle :{Colors.RESET}")
-	print(f"  Audio: {config['audio_format'].upper()} - {QUALITY_PRESETS['audio'][config['audio_quality']]['name']}")
-	print(f"  Vidéo: {config['video_format'].upper()} - {QUALITY_PRESETS['video'][config['video_quality']]['name']}")
-	print(f"  Paroles: {'Oui' if config['with_lyrics'] else 'Non'}")
-	print(f"  Métadonnées: {'Oui' if config['embed_metadata'] else 'Non'}")
-	print()
-	
-	if safe_input("Modifier la configuration ? (o/n): ", {'o', 'n'}) == 'n':
-		return config
-	
-	print("\n--- Audio par défaut ---")
-	config['audio_quality'] = show_quality_menu('audio')
-	config['audio_format'] = show_format_menu('audio')
-	
-	print("\n--- Vidéo par défaut ---")
-	config['video_quality'] = show_quality_menu('video')
-	config['video_format'] = show_format_menu('video')
-	
-	config['with_lyrics'] = safe_input("\nTélécharger les paroles quand disponibles ? (o/n): ", {'o', 'n'}) == 'o'
-	config['embed_metadata'] = safe_input("Intégrer les métadonnées (pochette, artiste, etc.) ? (o/n): ", {'o', 'n'}) == 'o'
-	
-	save_config(config)
-	print_success("Configuration sauvegardée !")
-	return config
+	while True:
+		print_header("⚙️  CONFIGURATION DES PRÉFÉRENCES")
+		
+		print(f"{Colors.BOLD}Configuration actuelle :{Colors.RESET}")
+		print(f"  {Colors.CYAN}1.{Colors.RESET} Audio: {config['audio_format'].upper()} - {QUALITY_PRESETS['audio'][config['audio_quality']]['name']}")
+		print(f"  {Colors.CYAN}2.{Colors.RESET} Vidéo: {config['video_format'].upper()} - {QUALITY_PRESETS['video'][config['video_quality']]['name']}")
+		print(f"  {Colors.CYAN}3.{Colors.RESET} Paroles: {'Oui' if config['with_lyrics'] else 'Non'}")
+		print(f"  {Colors.CYAN}4.{Colors.RESET} Métadonnées: {'Oui' if config['embed_metadata'] else 'Non'}")
+		twitch_status = f"Cookies depuis {config['twitch_browser'].capitalize()}" if config.get('twitch_browser') else 'Non configuré'
+		print(f"  {Colors.CYAN}5.{Colors.RESET} Twitch: {twitch_status}")
+		print(f"  {Colors.CYAN}6.{Colors.RESET} Tout modifier")
+		print(f"  {Colors.GREEN}0.{Colors.RESET} {Colors.GREEN}Terminé{Colors.RESET}")
+		print()
+		
+		choice = input(f"{Colors.YELLOW}Que voulez-vous modifier ? (0-6): {Colors.RESET}").strip()
+		
+		if choice == '0':
+			save_config(config)
+			print_success("Configuration sauvegardée !")
+			return config
+		
+		elif choice == '1':
+			print(f"\n{Colors.BOLD}--- Configuration Audio ---{Colors.RESET}")
+			config['audio_quality'] = show_quality_menu('audio')
+			config['audio_format'] = show_format_menu('audio')
+			print_success("Audio configuré !")
+		
+		elif choice == '2':
+			print(f"\n{Colors.BOLD}--- Configuration Vidéo ---{Colors.RESET}")
+			config['video_quality'] = show_quality_menu('video')
+			config['video_format'] = show_format_menu('video')
+			print_success("Vidéo configurée !")
+		
+		elif choice == '3':
+			config['with_lyrics'] = safe_input("\nTélécharger les paroles quand disponibles ? (o/n): ", {'o', 'n'}) == 'o'
+			print_success("Préférence paroles mise à jour !")
+		
+		elif choice == '4':
+			config['embed_metadata'] = safe_input("\nIntégrer les métadonnées (pochette, artiste, etc.) ? (o/n): ", {'o', 'n'}) == 'o'
+			print_success("Préférence métadonnées mise à jour !")
+		
+		elif choice == '5':
+			print(f"\n{Colors.BOLD}--- Authentification Twitch ---{Colors.RESET}")
+			print_info("Utilise les cookies de votre navigateur pour s'authentifier")
+			print(f"\n{Colors.BOLD}Navigateurs supportés :{Colors.RESET}")
+			print(f"  {Colors.CYAN}1.{Colors.RESET} Brave")
+			print(f"  {Colors.CYAN}2.{Colors.RESET} Chrome / Chromium")
+			print(f"  {Colors.CYAN}3.{Colors.RESET} Firefox")
+			print(f"  {Colors.CYAN}4.{Colors.RESET} Safari")
+			print(f"  {Colors.CYAN}5.{Colors.RESET} Edge")
+			print(f"  {Colors.CYAN}6.{Colors.RESET} Opera")
+			print(f"  {Colors.CYAN}7.{Colors.RESET} Désactiver")
+			
+			browser_choice = safe_number_input("\nVotre choix (1-7): ", 7)
+			browsers = ['brave', 'chrome', 'firefox', 'safari', 'edge', 'opera', '']
+			config['twitch_browser'] = browsers[browser_choice - 1]
+			
+			if config['twitch_browser']:
+				browser_name = config['twitch_browser'].capitalize()
+				print_success(f"Twitch configuré avec {browser_name}")
+				print_info("Assurez-vous d'être connecté à Twitch dans ce navigateur")
+			else:
+				print_info("Authentification Twitch désactivée")
+		
+		elif choice == '6':
+			print(f"\n{Colors.BOLD}--- Configuration complète ---{Colors.RESET}")
+			print("\n--- Audio par défaut ---")
+			config['audio_quality'] = show_quality_menu('audio')
+			config['audio_format'] = show_format_menu('audio')
+			
+			print("\n--- Vidéo par défaut ---")
+			config['video_quality'] = show_quality_menu('video')
+			config['video_format'] = show_format_menu('video')
+			
+			config['with_lyrics'] = safe_input("\nTélécharger les paroles quand disponibles ? (o/n): ", {'o', 'n'}) == 'o'
+			config['embed_metadata'] = safe_input("Intégrer les métadonnées (pochette, artiste, etc.) ? (o/n): ", {'o', 'n'}) == 'o'
+			
+			print(f"\n{Colors.BOLD}--- Authentification Twitch ---{Colors.RESET}")
+			print_info("Utilise les cookies de votre navigateur pour s'authentifier")
+			if safe_input("Configurer Twitch ? (o/n): ", {'o', 'n'}) == 'o':
+				print(f"\n{Colors.BOLD}Navigateurs supportés :{Colors.RESET}")
+				print(f"  {Colors.CYAN}1.{Colors.RESET} Brave")
+				print(f"  {Colors.CYAN}2.{Colors.RESET} Chrome / Chromium")
+				print(f"  {Colors.CYAN}3.{Colors.RESET} Firefox")
+				print(f"  {Colors.CYAN}4.{Colors.RESET} Safari")
+				print(f"  {Colors.CYAN}5.{Colors.RESET} Edge")
+				print(f"  {Colors.CYAN}6.{Colors.RESET} Opera")
+				print(f"  {Colors.CYAN}7.{Colors.RESET} Désactiver")
+				
+				browser_choice = safe_number_input("Votre choix (1-7): ", 7)
+				browsers = ['brave', 'chrome', 'firefox', 'safari', 'edge', 'opera', '']
+				config['twitch_browser'] = browsers[browser_choice - 1]
+			
+			print_success("Configuration complète terminée !")
+		
+		else:
+			print_error("Choix invalide. Veuillez choisir entre 0 et 6")
+		
+		print()  # Ligne vide avant de réafficher le menu
 
 def process_url(url, download_folder, config, silent=False, batch_mode=False, batch_settings=None):
 	"""Traite une URL avec les paramètres configurés"""
 	try:
-		formats, subtitles, info = list_formats_and_subtitles(url)
-		title = info.get('title', 'Unknown Title')
+		# Créer un ydl temporaire avec auth si nécessaire pour l'extraction d'info
+		ydl_opts_temp = {'quiet': True}
+		if config and config.get('twitch_browser') and 'twitch.tv' in url:
+			ydl_opts_temp['cookiesfrombrowser'] = (config['twitch_browser'],)
+		
+		with yt_dlp.YoutubeDL(ydl_opts_temp) as ydl:
+			info = ydl.extract_info(url, download=False)
+			formats = info.get('formats', [])
+			subtitles = info.get('subtitles', {})
+			title = info.get('title', 'Unknown Title')
 	except Exception as e:
 		print_error(f"Impossible d'extraire les informations de l'URL: {e}")
 		return False
 
 	if silent:
-		return download_audio(url, download_folder, config['audio_format'], config['audio_quality'], config['embed_metadata'])
+		return download_audio(url, download_folder, config['audio_format'], config['audio_quality'], config['embed_metadata'], config)
 
 	print(f"\n{Colors.CYAN}{Colors.BOLD}🎬 Contenu trouvé:{Colors.RESET} {title}")
 	
 	# Mode batch : utilise les paramètres sauvegardés
 	if batch_mode and batch_settings:
 		if batch_settings['type'] == 'audio':
-			return download_audio(url, download_folder, batch_settings['format'], batch_settings['quality'], config['embed_metadata'])
+			return download_audio(url, download_folder, batch_settings['format'], batch_settings['quality'], config['embed_metadata'], config)
 		else:
 			return download_video(url, download_folder, batch_settings['quality'], batch_settings['format'], 
-			                     batch_settings.get('subtitles', False), batch_settings.get('sub_lang', 'en'))
+			                     batch_settings.get('subtitles', False), batch_settings.get('sub_lang', 'en'), config)
 	
 	# Mode interactif
 	show_main_menu()
@@ -378,7 +472,7 @@ def process_url(url, download_folder, config, silent=False, batch_mode=False, ba
 	if choice == '1':
 		quality = show_quality_menu('audio')
 		audio_format = show_format_menu('audio')
-		return download_audio(url, download_folder, audio_format, quality, config['embed_metadata'])
+		return download_audio(url, download_folder, audio_format, quality, config['embed_metadata'], config)
 
 	elif choice in {'2', '3'}:
 		quality = show_quality_menu('video')
@@ -396,7 +490,7 @@ def process_url(url, download_folder, config, silent=False, batch_mode=False, ba
 		elif choice == '3':
 			print_warning("Aucun sous-titre disponible pour ce contenu")
 
-		return download_video(url, download_folder, quality, video_format, subtitles=subs, sub_lang=lang)
+		return download_video(url, download_folder, quality, video_format, subtitles=subs, sub_lang=lang, config=config)
 	
 	return False
 
@@ -406,9 +500,9 @@ def main():
 		update_yt_dlp()
 
 	if len(sys.argv) < 2 or '--help' in sys.argv:
-		print_header("📥 UNIVERSAL MEDIA DOWNLOADER")
+		print_header("📥 STREAMGRAB DOWNLOADER")
 		print(f"{Colors.BOLD}Usage:{Colors.RESET}")
-		print(f"  python media_dl.py <url_ou_fichier.txt> [options]")
+		print(f"  python streamgrab.py <url_ou_fichier.txt> [options]")
 		print(f"\n{Colors.BOLD}Options:{Colors.RESET}")
 		print(f"  --silent        Mode silencieux (télécharge sans interaction)")
 		print(f"  --with-lyrics   Télécharge et intègre les paroles")
