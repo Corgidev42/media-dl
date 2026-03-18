@@ -8,7 +8,7 @@ BOLD    = \033[1m
 
 VENV_DIR = .venv
 PYTHON = $(VENV_DIR)/bin/python
-PIP = $(VENV_DIR)/bin/pip
+PIP = $(PYTHON) -m pip
 SCRIPT = streamgrab.py
 URLS_FILE = urls.txt
 

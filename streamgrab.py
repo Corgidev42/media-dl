@@ -103,6 +103,19 @@ def log_download(title, url, media_type, format, folder='downloads'):
 		now = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M]")
 		log_file.write(f"{now} Downloaded ({media_type.upper()}, {format.upper()}): \"{title}\" from {url}\n")
 
+def remove_url_from_file(filepath, url):
+	"""Supprime une URL du fichier après téléchargement"""
+	try:
+		with open(filepath, 'r') as f:
+			lines = f.readlines()
+		url_clean = url.strip()
+		new_lines = [line for line in lines if line.strip() != url_clean]
+		if len(new_lines) < len(lines):
+			with open(filepath, 'w') as f:
+				f.writelines(new_lines)
+	except Exception as e:
+		print_warning(f"Impossible de supprimer l'URL du fichier: {e}")
+
 def update_yt_dlp():
 	print_info("Mise à jour de yt-dlp...")
 	os.system(f"{sys.executable} -m pip install --upgrade yt-dlp")
@@ -572,6 +585,7 @@ def main():
 			print(f"\n{Colors.MAGENTA}{Colors.BOLD}[{idx}/{len(urls)}]{Colors.RESET}")
 			if process_url(url, folder, config, silent_mode, batch_mode, batch_settings):
 				success_count += 1
+				remove_url_from_file(input_arg, url)
 		
 		print(f"\n{Colors.GREEN}{Colors.BOLD}═══════════════════════════════════{Colors.RESET}")
 		print_success(f"Téléchargements terminés : {success_count}/{len(urls)} réussis")

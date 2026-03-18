@@ -37,6 +37,7 @@ make run
 - 🎵 **Audio & Métadonnées** : Conversion MP3/M4A/FLAC avec intégration automatique des pochettes et tags.
 - 📝 **Paroles** : Téléchargement optionnel des paroles intégrées.
 - ⚙️ **Configuration Persistante** : Sauvegarde de vos préférences (qualité, format, dossier).
+- 🗑️ **Liste auto-nettoyante** : Chaque URL traitée (téléchargée ou ignorée) est automatiquement supprimée de `urls.txt`.
 
 ---
 
