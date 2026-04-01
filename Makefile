@@ -21,7 +21,7 @@ venv:
 install: venv
 	@echo "$(YELLOW)📦 Installing Python dependencies...$(RESET)"
 	@$(PIP) install --upgrade pip
-	@$(PIP) install yt-dlp mutagen requests
+	@$(PIP) install "yt-dlp[default]" mutagen requests
 
 run: all
 	@echo "$(GREEN)▶️  Lancement du téléchargeur en mode interactif...$(RESET)"

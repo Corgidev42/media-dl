@@ -29,11 +29,27 @@ DEFAULT_CONFIG = {
 	'with_lyrics': False,
 	'embed_metadata': True,
 	'download_folder': 'downloads',
-	'twitch_browser': ''  # chrome, firefox, safari, edge, opera, etc.
+	'twitch_browser': ''  # cookies: Twitch + YouTube (privé) — brave, chrome, firefox, etc.
 }
 
 CONFIG_FILE = 'config.json'
 WITH_LYRICS = '--with-lyrics' in sys.argv
+
+
+def url_uses_browser_cookies(url):
+	"""Twitch (VOD abonnés) et YouTube (vidéos privées / membres) via cookies navigateur."""
+	u = url.lower()
+	return 'twitch.tv' in u or 'youtube.com' in u or 'youtu.be' in u
+
+
+def apply_browser_cookies(ydl_opts, config, url, announce=True):
+	if config and config.get('twitch_browser') and url_uses_browser_cookies(url):
+		ydl_opts['cookiesfrombrowser'] = (config['twitch_browser'],)
+		if announce:
+			u = url.lower()
+			site = 'YouTube' if ('youtube' in u or 'youtu.be' in u) else 'Twitch'
+			print_info(f"Cookies {site} (navigateur {config['twitch_browser'].capitalize()})")
+
 
 # Presets de qualité
 QUALITY_PRESETS = {
@@ -118,7 +134,7 @@ def remove_url_from_file(filepath, url):
 
 def update_yt_dlp():
 	print_info("Mise à jour de yt-dlp...")
-	os.system(f"{sys.executable} -m pip install --upgrade yt-dlp")
+	os.system(f'{sys.executable} -m pip install --upgrade "yt-dlp[default]"')
 	print_success("yt-dlp mis à jour avec succès")
 	sys.exit(0)
 
@@ -209,11 +225,7 @@ def download_audio(url, download_folder, audio_format='mp3', quality='high', emb
 		'progress_hooks': [progress_hook],
 	}
 	
-	# Ajouter l'authentification Twitch via cookies navigateur
-	if config and config.get('twitch_browser'):
-		if 'twitch.tv' in url:
-			ydl_opts['cookiesfrombrowser'] = (config['twitch_browser'],)
-			print_info(f"Authentification Twitch activée (cookies depuis {config['twitch_browser'].capitalize()})")
+	apply_browser_cookies(ydl_opts, config, url)
 
 	with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 		try:
@@ -269,12 +281,8 @@ def download_video(url, download_folder, quality='high', video_format='mp4', sub
 		'progress_hooks': [progress_hook],
 	}
 	
-	# Ajouter l'authentification Twitch via cookies navigateur
-	if config and config.get('twitch_browser'):
-		if 'twitch.tv' in url:
-			ydl_opts['cookiesfrombrowser'] = (config['twitch_browser'],)
-			print_info(f"Authentification Twitch activée (cookies depuis {config['twitch_browser'].capitalize()})")
-	
+	apply_browser_cookies(ydl_opts, config, url)
+
 	with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 		try:
 			info = ydl.extract_info(url, download=True)
@@ -349,7 +357,7 @@ def configure_preferences(config):
 		print(f"  {Colors.CYAN}3.{Colors.RESET} Paroles: {'Oui' if config['with_lyrics'] else 'Non'}")
 		print(f"  {Colors.CYAN}4.{Colors.RESET} Métadonnées: {'Oui' if config['embed_metadata'] else 'Non'}")
 		twitch_status = f"Cookies depuis {config['twitch_browser'].capitalize()}" if config.get('twitch_browser') else 'Non configuré'
-		print(f"  {Colors.CYAN}5.{Colors.RESET} Twitch: {twitch_status}")
+		print(f"  {Colors.CYAN}5.{Colors.RESET} Navigateur (Twitch / YouTube privé): {twitch_status}")
 		print(f"  {Colors.CYAN}6.{Colors.RESET} Tout modifier")
 		print(f"  {Colors.GREEN}0.{Colors.RESET} {Colors.GREEN}Terminé{Colors.RESET}")
 		print()
@@ -382,8 +390,8 @@ def configure_preferences(config):
 			print_success("Préférence métadonnées mise à jour !")
 		
 		elif choice == '5':
-			print(f"\n{Colors.BOLD}--- Authentification Twitch ---{Colors.RESET}")
-			print_info("Utilise les cookies de votre navigateur pour s'authentifier")
+			print(f"\n{Colors.BOLD}--- Cookies navigateur (Twitch, YouTube privé) ---{Colors.RESET}")
+			print_info("Même navigateur que celui où vous êtes connecté à Twitch / YouTube")
 			print(f"\n{Colors.BOLD}Navigateurs supportés :{Colors.RESET}")
 			print(f"  {Colors.CYAN}1.{Colors.RESET} Brave")
 			print(f"  {Colors.CYAN}2.{Colors.RESET} Chrome / Chromium")
@@ -399,10 +407,10 @@ def configure_preferences(config):
 			
 			if config['twitch_browser']:
 				browser_name = config['twitch_browser'].capitalize()
-				print_success(f"Twitch configuré avec {browser_name}")
-				print_info("Assurez-vous d'être connecté à Twitch dans ce navigateur")
+				print_success(f"Navigateur pour les cookies : {browser_name}")
+				print_info("Restez connecté à Twitch / YouTube dans ce navigateur pour les contenus restreints")
 			else:
-				print_info("Authentification Twitch désactivée")
+				print_info("Cookies navigateur désactivés")
 		
 		elif choice == '6':
 			print(f"\n{Colors.BOLD}--- Configuration complète ---{Colors.RESET}")
@@ -417,9 +425,9 @@ def configure_preferences(config):
 			config['with_lyrics'] = safe_input("\nTélécharger les paroles quand disponibles ? (o/n): ", {'o', 'n'}) == 'o'
 			config['embed_metadata'] = safe_input("Intégrer les métadonnées (pochette, artiste, etc.) ? (o/n): ", {'o', 'n'}) == 'o'
 			
-			print(f"\n{Colors.BOLD}--- Authentification Twitch ---{Colors.RESET}")
-			print_info("Utilise les cookies de votre navigateur pour s'authentifier")
-			if safe_input("Configurer Twitch ? (o/n): ", {'o', 'n'}) == 'o':
+			print(f"\n{Colors.BOLD}--- Cookies navigateur (Twitch, YouTube privé) ---{Colors.RESET}")
+			print_info("Même navigateur que celui où vous êtes connecté à Twitch / YouTube")
+			if safe_input("Configurer le navigateur pour les cookies ? (o/n): ", {'o', 'n'}) == 'o':
 				print(f"\n{Colors.BOLD}Navigateurs supportés :{Colors.RESET}")
 				print(f"  {Colors.CYAN}1.{Colors.RESET} Brave")
 				print(f"  {Colors.CYAN}2.{Colors.RESET} Chrome / Chromium")
@@ -445,8 +453,7 @@ def process_url(url, download_folder, config, silent=False, batch_mode=False, ba
 	try:
 		# Créer un ydl temporaire avec auth si nécessaire pour l'extraction d'info
 		ydl_opts_temp = {'quiet': True}
-		if config and config.get('twitch_browser') and 'twitch.tv' in url:
-			ydl_opts_temp['cookiesfrombrowser'] = (config['twitch_browser'],)
+		apply_browser_cookies(ydl_opts_temp, config, url, announce=False)
 		
 		with yt_dlp.YoutubeDL(ydl_opts_temp) as ydl:
 			info = ydl.extract_info(url, download=False)

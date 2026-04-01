@@ -12,7 +12,15 @@
 make all
 ```
 
-Cela crée l'environnement virtuel et installe les dépendances nécessaires (`yt-dlp`, `mutagen`, `requests`).
+Cela crée l'environnement virtuel et installe les dépendances (`yt-dlp[default]` inclut les scripts EJS pour YouTube, `mutagen`, `requests`).
+
+**YouTube (obligatoire sur la machine) :** installez aussi un moteur JavaScript, par exemple [Deno](https://docs.deno.com/runtime/getting_started/installation/) (recommandé par yt-dlp) :
+
+```bash
+brew install deno
+```
+
+Sans cela, vous pouvez voir des erreurs du type « Signature solving failed » ou « Only images are available ».
 
 ### 2. Utilisation Simple
 
@@ -41,18 +49,20 @@ make run
 
 ---
 
-## 🎮 Configuration Twitch (VOD Abonnés)
+## 🎮 Cookies navigateur (Twitch, YouTube privé)
 
-Pour télécharger des contenus réservés aux abonnés Twitch, StreamGrab utilise les cookies de votre navigateur :
+Le même réglage sert aux **VOD Twitch réservés aux abonnés** et aux **vidéos YouTube privées / restreintes** (vous devez y avoir accès avec votre compte) : yt-dlp lit les cookies du navigateur choisi.
 
 1. Lancez la configuration :
    ```bash
    make config
    ```
-2. Allez dans le menu **Twitch**.
-3. Sélectionnez votre navigateur (ex: **Brave**, **Chrome**, **Firefox**).
-4. Assurez-vous d'être connecté à Twitch sur ce navigateur.
-5. Lancez vos téléchargements normalement !
+2. Choisissez **Navigateur (Twitch / YouTube privé)**.
+3. Sélectionnez le navigateur où vous êtes connecté (ex. **Brave**, **Chrome**, **Firefox**).
+4. Restez connecté à **Twitch** et/ou **YouTube** dans ce navigateur.
+5. Relancez vos téléchargements.
+
+**Dépannage YouTube :** si vous voyez « Signature solving failed » ou « Only images are available », installez **Deno** (voir section Démarrage rapide) et réexécutez `make install` pour avoir `yt-dlp[default]`. Détails : [wiki EJS yt-dlp](https://github.com/yt-dlp/yt-dlp/wiki/EJS).
 
 ---
 
